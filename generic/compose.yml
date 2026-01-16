@@ -1,0 +1,56 @@
+name: docker
+
+services:
+  aio:
+    image: ghcr.io/swarmprom/aio:latest
+    container_name: aio
+    restart: always
+    cap_add:
+      - SYSLOG
+      - SYS_TIME
+    ports:
+      - "8080:8080" # cadvisor
+      - "3000:3000" # grafana
+      - "3100:3100" # loki
+      - "9100:9100" # node-exporter
+      - "9080:9080" # promtail
+      - "4317:4317" # otel grpc
+      - "4318:4318" # otel http
+      - "9090:9090" # prometheus
+      - "4040:4040" # pyroscope
+      - "3200:3200" # tempo
+      - 12345:12345 # pyroscope-alloy-ebpf
+    volumes:
+      - data:/data
+      - /:/rootfs:ro
+      - /sys:/sys:ro
+      - /proc:/proc:ro
+      - /dev/disk:/dev/disk:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    devices:
+      - /dev/kmsg
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+  pyroscope-alloy-ebpf:
+    image: ghcr.io/swarmprom/pyroscope-alloy-ebpf:latest
+    container_name: pyroscope-alloy-ebpf
+    pid: host
+    privileged: true
+    restart: always
+    network_mode: service:aio
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+volumes:
+  data:
+networks:
+  default:
+    driver: bridge
