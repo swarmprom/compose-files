@@ -35,20 +35,6 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-  pyroscope-alloy-ebpf:
-    image: ghcr.io/swarmprom/pyroscope-alloy-ebpf:latest
-    container_name: pyroscope-alloy-ebpf
-    pid: host
-    privileged: true
-    restart: always
-    network_mode: service:aio
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 volumes:
   data:
 networks:
